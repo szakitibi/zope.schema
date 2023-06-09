@@ -105,6 +105,7 @@ from zope.schema.interfaces import ITimedelta
 from zope.schema.interfaces import ITuple
 from zope.schema.interfaces import NotAnInterface
 from zope.schema.interfaces import NotUnique
+from zope.schema.interfaces import RequiredMissing
 from zope.schema.interfaces import ValidationError
 from zope.schema.interfaces import WrongContainedType
 from zope.schema.interfaces import WrongType
@@ -767,6 +768,10 @@ class Collection(MinMaxLen, Iterable):
     def _validate(self, value):
         super(Collection, self)._validate(value)
         errors = _validate_sequence(self.value_type, value)
+        if self.required and not value:
+            raise RequiredMissing(
+                self.__name__
+            ).with_field_and_value(self, value)
         if errors:
             try:
                 raise WrongContainedType(
